@@ -64,16 +64,16 @@ Format rules:
 The quoted phrase doubles as a record of what the text said when the comment was
 made. The AI consuming the file can diff "what was commented on" vs "what's
 there now," and — when it edits anchored text — **rewrite the quoted phrase** to
-re-sync the anchor. The extension offers the same re-sync as a quick fix
-("Update snapshot to current text").
+re-sync the anchor. The extension offers the same re-sync via the
+"Re-anchor to selection" quick fix, which rewrites the snapshot.
 
 ## Interactions
 
 | Action | Keyboard | Mouse |
 |---|---|---|
 | Add | Select text (or leave cursor in a block) → `cmd+alt+m` → input box → Enter | Right-click → "Add Review Comment" |
-| Edit | Cursor on marker → code action ("Edit Review Comment") → prefilled input box | Hover marker → **Edit** link; or click gutter note in preview |
-| Remove | Code action "Remove Review Comment" (deletes marker + definition) | Hover → **Remove** link; or × button on preview gutter note |
+| Edit | Cursor on marker → code action ("Edit Review Comment") → prefilled input box | Hover marker → **Edit** link |
+| Remove | Code action "Remove Review Comment" (deletes marker + definition) | Hover → **Remove** link |
 | Strip all | Command palette: "Strip All Review Comments" | same |
 
 Add anchors to the selection when text is selected, otherwise to the block
@@ -99,7 +99,7 @@ edit; it degrades and reports.**
 |---|---|---|---|
 | `ok` | Text immediately before marker matches the quoted phrase | Normal highlight + note | — |
 | `moved` | Exact phrase found elsewhere in the marker's paragraph | Highlight at found location | "Move marker next to phrase" |
-| `stale` | Phrase not found in paragraph | Degrade to block anchor on the marker's paragraph; ⚠ on the gutter note, which still shows the original quoted phrase | "Re-anchor to selection", "Convert to block comment", "Update snapshot to current text" |
+| `stale` | Phrase not found in paragraph | Degrade to block anchor on the marker's paragraph; ⚠ on the gutter note, which still shows the original quoted phrase | "Re-anchor to selection" (rewrites the snapshot), "Convert to block comment" |
 | `orphaned` definition | `rc-` definition with no matching marker | Diagnostic squiggle on the definition | "Remove orphaned comment" |
 | dangling marker | `rc-` marker with no definition | Diagnostic on the marker | "Remove marker" |
 
@@ -134,14 +134,17 @@ TypeScript VSCode extension (`yo code` scaffold, esbuild). Three layers:
   hides `rc-` definitions; passes regular footnotes through untouched.
 - Preview CSS: right-gutter layout with inline-callout fallback at narrow
   widths.
-- Preview script: click on note / × button posts a message to the extension,
-  which opens the edit input box or performs the removal.
+- Preview is render-only in v1: the built-in preview offers no reliable
+  click-handler channel back to the extension, so notes carry `data-line`
+  attributes and double-clicking a note uses the preview's built-in
+  jump-to-source to land on the definition, where hover/code actions take
+  over. Preview-side edit/remove buttons are deferred to v1.1.
 
 ### Contributions (`package.json`)
 
 Commands, `editor/context` menu items, keybinding (`cmd+alt+m` / `ctrl+alt+m`),
-`markdown.markdownItPlugins`, `markdown.previewStyles`,
-`markdown.previewScripts`. Activation on `onLanguage:markdown`.
+`markdown.markdownItPlugins`, `markdown.previewStyles`. Activation on
+`onLanguage:markdown`.
 
 ## Edge cases
 
@@ -164,6 +167,7 @@ Commands, `editor/context` menu items, keybinding (`cmd+alt+m` / `ctrl+alt+m`),
 ## Out of scope (v1)
 
 - Sidebar tree view of comments (v1.1).
+- Preview-side edit/remove buttons on gutter notes (v1.1).
 - Multi-file / workspace-wide comment aggregation.
 - Any storage outside the `.md` file; any server or sync.
 - Configurable syntax — the `rc-` convention is fixed.
