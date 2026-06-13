@@ -19,7 +19,7 @@ export class DiagnosticsManager {
       if (c.state !== 'stale') continue;
       const d = new vscode.Diagnostic(
         toRange(c.marker),
-        `Review comment rc-${c.id} anchor is stale: "${c.anchorPhrase}" no longer matches the text.`,
+        `Review comment rc-${c.id} anchor is stale: "${c.anchorPhrase ?? '(empty)'}" no longer matches the text.`,
         vscode.DiagnosticSeverity.Warning
       );
       d.code = 'rc-stale';

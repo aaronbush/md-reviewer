@@ -3,7 +3,7 @@ import { parseReviewComments } from '../core/parser';
 import { commentAt } from './commands';
 
 function safeMd(s: string): string {
-  return s.replace(/[\\`*_{}\[\]()#+\-!<>]/g, (ch) => '\\' + ch);
+  return s.replace(/[\\`*_{}\[\]()#+\-!<>:|]/g, (ch) => '\\' + ch);
 }
 
 export function registerHover(context: vscode.ExtensionContext) {
