@@ -8,7 +8,35 @@
   "categories": ["Other"],
   "activationEvents": ["onLanguage:markdown"],
   "main": "./dist/extension.js",
-  "contributes": {},
+  "contributes": {
+    "commands": [
+      { "command": "mdReview.addComment", "title": "Add Review Comment", "category": "MD Review" },
+      { "command": "mdReview.editComment", "title": "Edit Review Comment", "category": "MD Review" },
+      { "command": "mdReview.removeComment", "title": "Remove Review Comment", "category": "MD Review" },
+      { "command": "mdReview.goToDefinition", "title": "Go to Review Comment Definition", "category": "MD Review" },
+      { "command": "mdReview.stripAll", "title": "Strip All Review Comments", "category": "MD Review" }
+    ],
+    "menus": {
+      "editor/context": [
+        { "command": "mdReview.addComment", "when": "resourceLangId == markdown", "group": "1_modification@9" }
+      ],
+      "commandPalette": [
+        { "command": "mdReview.addComment", "when": "editorLangId == markdown" },
+        { "command": "mdReview.editComment", "when": "editorLangId == markdown" },
+        { "command": "mdReview.removeComment", "when": "editorLangId == markdown" },
+        { "command": "mdReview.goToDefinition", "when": "editorLangId == markdown" },
+        { "command": "mdReview.stripAll", "when": "editorLangId == markdown" }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "mdReview.addComment",
+        "key": "ctrl+alt+m",
+        "mac": "cmd+alt+m",
+        "when": "editorTextFocus && editorLangId == markdown"
+      }
+    ]
+  },
   "scripts": {
     "build": "node esbuild.js",
     "watch": "node esbuild.js --watch",
