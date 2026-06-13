@@ -18,10 +18,11 @@ export function activate(context: vscode.ExtensionContext) {
     diagnostics.refresh(doc);
   };
 
-  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timers = new Map<string, ReturnType<typeof setTimeout>>();
   const refreshSoon = (doc: vscode.TextDocument) => {
-    if (timer) clearTimeout(timer);
-    timer = setTimeout(() => refresh(doc), 200);
+    const key = doc.uri.toString();
+    clearTimeout(timers.get(key));
+    timers.set(key, setTimeout(() => { timers.delete(key); refresh(doc); }, 200));
   };
 
   context.subscriptions.push(
@@ -29,7 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.onDidChangeActiveTextEditor((ed) => ed && refresh(ed.document)),
     vscode.workspace.onDidOpenTextDocument(refresh),
     vscode.workspace.onDidCloseTextDocument((doc) => diagnostics.clear(doc)),
-    new vscode.Disposable(() => timer && clearTimeout(timer))
+    new vscode.Disposable(() => timers.forEach(clearTimeout))
   );
   if (vscode.window.activeTextEditor) refresh(vscode.window.activeTextEditor.document);
 }
