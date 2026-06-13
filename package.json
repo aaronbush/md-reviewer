@@ -14,7 +14,10 @@
       { "command": "mdReview.editComment", "title": "Edit Review Comment", "category": "MD Review" },
       { "command": "mdReview.removeComment", "title": "Remove Review Comment", "category": "MD Review" },
       { "command": "mdReview.goToDefinition", "title": "Go to Review Comment Definition", "category": "MD Review" },
-      { "command": "mdReview.stripAll", "title": "Strip All Review Comments", "category": "MD Review" }
+      { "command": "mdReview.stripAll", "title": "Strip All Review Comments", "category": "MD Review" },
+      { "command": "mdReview.reanchor", "title": "Re-anchor Review Comment to Selection", "category": "MD Review" },
+      { "command": "mdReview.convertToBlock", "title": "Convert Review Comment to Block Comment", "category": "MD Review" },
+      { "command": "mdReview.moveMarker", "title": "Move Review Marker Next to Phrase", "category": "MD Review" }
     ],
     "menus": {
       "editor/context": [
@@ -25,7 +28,10 @@
         { "command": "mdReview.editComment", "when": "editorLangId == markdown" },
         { "command": "mdReview.removeComment", "when": "editorLangId == markdown" },
         { "command": "mdReview.goToDefinition", "when": "editorLangId == markdown" },
-        { "command": "mdReview.stripAll", "when": "editorLangId == markdown" }
+        { "command": "mdReview.stripAll", "when": "editorLangId == markdown" },
+        { "command": "mdReview.reanchor", "when": "false" },
+        { "command": "mdReview.convertToBlock", "when": "false" },
+        { "command": "mdReview.moveMarker", "when": "false" }
       ]
     },
     "keybindings": [
