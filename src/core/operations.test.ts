@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { parseReviewComments } from './parser';
-import { applyEdits, insertComment, nextId } from './operations';
+import { applyEdits, editComment, insertComment, nextId, removeComment, stripAll } from './operations';
 
 describe('applyEdits', () => {
   test('applies multiple edits against original offsets', () => {
@@ -60,5 +60,54 @@ describe('insertComment', () => {
     const { edits } = insertComment(text, parseReviewComments(text), 0, 4, 'c');
     const out = applyEdits(text, edits);
     expect(out).toBe('word[^rc-1]\n[^rc-1]: 💬 ("word") c\n');
+  });
+});
+
+describe('editComment', () => {
+  test('replaces first-line text, preserving status, phrase, and replies', () => {
+    const text =
+      'fee is 25 feet[^rc-1] now\n\n' +
+      '[^rc-1]: 💬 (open) ("25 feet") old text\n' +
+      '    ↩ AI: noted\n';
+    const out = applyEdits(text, editComment(text, parseReviewComments(text), 1, 'new text'));
+    expect(out).toContain('[^rc-1]: 💬 (open) ("25 feet") new text\n    ↩ AI: noted\n');
+    expect(out).not.toContain('old text');
+  });
+});
+
+describe('removeComment', () => {
+  test('removes marker and whole definition block', () => {
+    const text =
+      'fee is 25 feet[^rc-1] now\n\n[^rc-1]: 💬 ("25 feet") gone\n    ↩ reply too\n';
+    const out = applyEdits(text, removeComment(text, parseReviewComments(text), 1));
+    expect(out).toBe('fee is 25 feet now\n\n');
+  });
+
+  test('removes a dangling marker by id', () => {
+    const text = 'dangling[^rc-5] here\n';
+    const out = applyEdits(text, removeComment(text, parseReviewComments(text), 5));
+    expect(out).toBe('dangling here\n');
+  });
+
+  test('removes an orphaned definition by id', () => {
+    const text = 'body\n\n[^rc-2]: 💬 orphan\n';
+    const out = applyEdits(text, removeComment(text, parseReviewComments(text), 2));
+    expect(out).toBe('body\n\n');
+  });
+});
+
+describe('stripAll', () => {
+  test('removes all rc comments, orphans, and danglings; leaves regular footnotes', () => {
+    const text =
+      'a[^rc-1] b[^1] c[^rc-9]\n\n' +
+      '[^rc-1]: 💬 one\n' +
+      '[^1]: real footnote\n' +
+      '[^rc-3]: 💬 orphan\n';
+    const out = applyEdits(text, stripAll(parseReviewComments(text)));
+    expect(out).toBe('a b[^1] c\n\n[^1]: real footnote\n');
+  });
+
+  test('single undo friendliness: returns plain edits, no comments → no edits', () => {
+    expect(stripAll(parseReviewComments('plain\n'))).toEqual([]);
   });
 });
