@@ -16,7 +16,9 @@ export function registerHover(context: vscode.ExtensionContext) {
           const c = commentAt(parse, doc.offsetAt(position));
           if (!c) return undefined;
           const md = new vscode.MarkdownString(undefined, true);
-          md.isTrusted = true;
+          md.isTrusted = {
+            enabledCommands: ['mdReview.editComment', 'mdReview.removeComment', 'mdReview.goToDefinition'],
+          };
           const arg = encodeURIComponent(JSON.stringify([c.id]));
           const stale = c.state === 'stale' ? ' · ⚠ stale anchor' : '';
           md.appendMarkdown(

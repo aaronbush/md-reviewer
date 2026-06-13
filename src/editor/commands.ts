@@ -78,7 +78,7 @@ export function registerCommands(context: vscode.ExtensionContext) {
       }
       const newText = await vscode.window.showInputBox({
         prompt: `Edit review comment rc-${c.id}`,
-        value: c.text.split('\n')[0],
+        value: c.text.split('\n').join(' '),
       });
       if (newText === undefined) return;
       const text = editor.document.getText();

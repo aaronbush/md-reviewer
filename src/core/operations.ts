@@ -90,20 +90,17 @@ function buildDefFirstLine(
 }
 
 export function editComment(
-  text: string,
+  _text: string,
   parse: ParseResult,
   id: number,
   newText: string
 ): TextEdit[] {
   const c = parse.comments.find((c) => c.id === id);
   if (!c) return [];
-  return [
-    {
-      start: c.def.start,
-      end: defFirstLineEnd(text, c.def),
-      newText: buildDefFirstLine(id, c.status, c.anchorPhrase, newText),
-    },
-  ];
+  let rebuilt = buildDefFirstLine(id, c.status, c.anchorPhrase, newText);
+  for (const r of c.replies) rebuilt += `\n    ↩ ${r}`;
+  rebuilt += '\n';
+  return [{ start: c.def.start, end: c.def.end, newText: rebuilt }];
 }
 
 export function removeComment(_text: string, parse: ParseResult, id: number): TextEdit[] {

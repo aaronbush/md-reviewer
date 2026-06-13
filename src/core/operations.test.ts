@@ -73,6 +73,18 @@ describe('editComment', () => {
     expect(out).toContain('[^rc-1]: 💬 (open) ("25 feet") new text\n    ↩ AI: noted\n');
     expect(out).not.toContain('old text');
   });
+
+  test('replaces all text continuation lines, preserving only replies', () => {
+    const text =
+      'fee is 25 feet[^rc-1] now\n\n' +
+      '[^rc-1]: 💬 (open) ("25 feet") line one\n' +
+      '    line two\n' +
+      '    ↩ AI: noted\n';
+    const out = applyEdits(text, editComment(text, parseReviewComments(text), 1, 'replaced'));
+    expect(out).toContain('[^rc-1]: 💬 (open) ("25 feet") replaced\n    ↩ AI: noted\n');
+    expect(out).not.toContain('line one');
+    expect(out).not.toContain('line two');
+  });
 });
 
 describe('removeComment', () => {
