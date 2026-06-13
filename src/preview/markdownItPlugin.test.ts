@@ -42,6 +42,21 @@ describe('reviewCommentsPlugin', () => {
     expect(html).not.toContain('<b>bold</b>');
   });
 
+  test('moved comment highlights phrase at its found location', () => {
+    const html = md.render(
+      'Now 25 feet is early, marker later[^rc-1] in line.\n\n[^rc-1]: 💬 ("25 feet") check\n'
+    );
+    expect(html).toContain('<span class="rc-anchor">25 feet</span>');
+    expect(html).toContain('rc-note');
+  });
+
+  test('multi-line comment text renders newlines as <br>', () => {
+    const html = md.render(
+      'Text[^rc-1] here.\n\n[^rc-1]: 💬 first line\n    second line\n'
+    );
+    expect(html).toContain('first line<br>second line');
+  });
+
   test('regular markdown is unaffected', () => {
     const html = md.render('# Title\n\nplain *em* text\n');
     expect(html).toContain('<h1>Title</h1>');

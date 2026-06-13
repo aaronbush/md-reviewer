@@ -34,15 +34,17 @@ export function reviewCommentsPlugin(md: MarkdownIt) {
     if (!silent) {
       const id = parseInt(m[1], 10);
       const comment: ReviewComment | undefined = state.env.rcComments?.get(id);
-      if (comment?.anchorPhrase && state.pending.endsWith(comment.anchorPhrase)) {
-        state.pending = state.pending.slice(
-          0,
-          state.pending.length - comment.anchorPhrase.length
-        );
-        state.push('rc_anchor_open', 'span', 1);
-        const t = state.push('text', '', 0);
-        t.content = comment.anchorPhrase;
-        state.push('rc_anchor_close', 'span', -1);
+      if (comment?.anchorPhrase) {
+        const phraseIdx = state.pending.indexOf(comment.anchorPhrase);
+        if (phraseIdx !== -1) {
+          const after = state.pending.slice(phraseIdx + comment.anchorPhrase.length);
+          state.pending = state.pending.slice(0, phraseIdx);
+          state.push('rc_anchor_open', 'span', 1);
+          const t = state.push('text', '', 0);
+          t.content = comment.anchorPhrase;
+          state.push('rc_anchor_close', 'span', -1);
+          state.pending = after;
+        }
       }
       const ref = state.push('rc_ref', 'sup', 0);
       ref.meta = { id, comment };
@@ -68,7 +70,7 @@ export function reviewCommentsPlugin(md: MarkdownIt) {
     if (stale && comment.anchorPhrase) {
       note += `<span class="rc-note-was">was: "${esc(comment.anchorPhrase)}"</span>`;
     }
-    note += `<span class="rc-note-text">${esc(comment.text)}</span>`;
+    note += `<span class="rc-note-text">${esc(comment.text).replace(/\n/g, '<br>')}</span>`;
     for (const r of comment.replies) {
       note += `<span class="rc-note-reply">↩ ${esc(r)}</span>`;
     }
