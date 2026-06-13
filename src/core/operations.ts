@@ -134,7 +134,8 @@ export function reanchor(
 ): TextEdit[] {
   const c = parse.comments.find((c) => c.id === id);
   if (!c || selEnd <= selStart) return [];
-  const phrase = text.slice(selStart, selEnd);
+  const phrase = text.slice(selStart, selEnd).replace(/\[\^rc-\d+\]/g, '');
+  if (!phrase) return [];
   return [
     spanEdit(c.marker),
     { start: selEnd, end: selEnd, newText: `[^rc-${id}]` },

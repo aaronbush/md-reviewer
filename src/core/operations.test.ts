@@ -146,3 +146,33 @@ describe('recovery operations', () => {
     expect(parseReviewComments(out).comments[0].state).toBe('ok');
   });
 });
+
+describe('no-op guards', () => {
+  test('operations on unknown id return no edits', () => {
+    const text = 'a[^rc-1] b\n\n[^rc-1]: 💬 x\n';
+    const parse = parseReviewComments(text);
+    expect(editComment(text, parse, 99, 'x')).toEqual([]);
+    expect(removeComment(text, parse, 99)).toEqual([]);
+    expect(reanchor(text, parse, 99, 0, 1)).toEqual([]);
+    expect(convertToBlock(text, parse, 99)).toEqual([]);
+    expect(moveMarkerToPhrase(text, parse, 99)).toEqual([]);
+  });
+
+  test('reanchor with empty selection or selection of only the marker is a no-op', () => {
+    const text = 'fee is thirty feet[^rc-1] now\n\n[^rc-1]: 💬 ("25 feet") check\n';
+    const parse = parseReviewComments(text);
+    expect(reanchor(text, parse, 1, 5, 5)).toEqual([]);
+    const ms = text.indexOf('[^rc-1]');
+    expect(reanchor(text, parse, 1, ms, ms + '[^rc-1]'.length)).toEqual([]);
+  });
+
+  test('reanchor selection overlapping the marker strips marker syntax from snapshot', () => {
+    const text = 'fee is thirty feet[^rc-1] now\n\n[^rc-1]: 💬 ("25 feet") check\n';
+    const parse = parseReviewComments(text);
+    const selStart = text.indexOf('thirty feet');
+    const selEnd = text.indexOf('[^rc-1]') + '[^rc-1]'.length;
+    const out = applyEdits(text, reanchor(text, parse, 1, selStart, selEnd));
+    expect(out).toContain('("thirty feet")');
+    expect(out).not.toContain('("thirty feet[^rc-1]")');
+  });
+});
