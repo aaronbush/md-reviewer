@@ -1,0 +1,64 @@
+:root {
+  --rc-note-width: 220px;
+  --rc-accent: #e0a800;
+  --rc-stale-accent: #d9534f;
+}
+
+.rc-anchor {
+  background: rgba(255, 213, 79, 0.35);
+  border-radius: 2px;
+}
+
+.rc-ref {
+  color: var(--rc-accent);
+  font-size: 0.8em;
+  user-select: none;
+}
+
+.rc-note {
+  display: block;
+  font-size: 0.82em;
+  line-height: 1.35;
+  border-left: 3px solid var(--rc-accent);
+  background: rgba(128, 128, 128, 0.08);
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin: 6px 0;
+}
+
+.rc-note.rc-stale {
+  border-left-color: var(--rc-stale-accent);
+}
+
+.rc-note > span {
+  display: block;
+}
+
+.rc-note-id {
+  font-weight: 600;
+  opacity: 0.75;
+  margin-bottom: 2px;
+}
+
+.rc-note-was {
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.rc-note-reply {
+  margin-top: 4px;
+  opacity: 0.9;
+}
+
+/* Wide panes: float notes into a right gutter, Google-Docs style. */
+@media (min-width: 960px) {
+  body {
+    padding-right: calc(var(--rc-note-width) + 40px);
+  }
+  .rc-note {
+    float: right;
+    clear: right;
+    width: var(--rc-note-width);
+    margin: 0 calc(-1 * (var(--rc-note-width) + 28px)) 8px 0;
+  }
+}

@@ -4,6 +4,7 @@ import { DecorationManager } from './editor/decorations';
 import { DiagnosticsManager } from './editor/diagnostics';
 import { registerHover } from './editor/hover';
 import { registerCodeActions } from './editor/codeActions';
+import { reviewCommentsPlugin } from './preview/markdownItPlugin';
 
 export function activate(context: vscode.ExtensionContext) {
   registerCommands(context);
@@ -33,6 +34,11 @@ export function activate(context: vscode.ExtensionContext) {
     new vscode.Disposable(() => timers.forEach(clearTimeout))
   );
   if (vscode.window.activeTextEditor) refresh(vscode.window.activeTextEditor.document);
+  return {
+    extendMarkdownIt(md: any) {
+      return md.use(reviewCommentsPlugin);
+    },
+  };
 }
 
 export function deactivate() {}

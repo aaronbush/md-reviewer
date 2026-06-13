@@ -9,6 +9,8 @@
   "activationEvents": ["onLanguage:markdown"],
   "main": "./dist/extension.js",
   "contributes": {
+    "markdown.markdownItPlugins": true,
+    "markdown.previewStyles": ["./media/preview.css"],
     "commands": [
       { "command": "mdReview.addComment", "title": "Add Review Comment", "category": "MD Review" },
       { "command": "mdReview.editComment", "title": "Edit Review Comment", "category": "MD Review" },
