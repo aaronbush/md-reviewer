@@ -1,0 +1,27 @@
+{
+  "name": "md-review",
+  "displayName": "Markdown Review Comments",
+  "description": "Attach lightweight review comments to markdown files as rc- footnotes.",
+  "version": "0.1.0",
+  "publisher": "abush",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Other"],
+  "activationEvents": ["onLanguage:markdown"],
+  "main": "./dist/extension.js",
+  "contributes": {},
+  "scripts": {
+    "build": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "test": "vitest run --passWithNoTests",
+    "vscode:prepublish": "node esbuild.js --production"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.0",
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.21.5",
+    "markdown-it": "^14.1.0",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  }
+}
