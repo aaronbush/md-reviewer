@@ -9,7 +9,6 @@ import {
 
 const DEF_RE =
   /^\[\^rc-(\d+)\]: 💬(?: \(([A-Za-z][\w-]*)\))?(?: \("((?:[^"\\]|\\.)*)"\))?(?: (.*))?$/;
-const MARKER_RE = /\[\^rc-(\d+)\]/g;
 const CONT_RE = /^(?: {4}|\t)(.*)$/;
 const FENCE_RE = /^(`{3,}|~{3,})/;
 
@@ -36,7 +35,7 @@ function scanLines(text: string): Line[] {
   for (;;) {
     let end = text.indexOf('\n', start);
     if (end === -1) end = text.length;
-    const lineText = text.slice(start, end);
+    const lineText = text.slice(start, end).replace(/\r$/, '');
     const fm = FENCE_RE.exec(lineText.trimStart());
     let lineInFence = inFence;
     if (fm) {
@@ -80,7 +79,7 @@ export function parseReviewComments(text: string): ParseResult {
     const def: Def = {
       id: parseInt(m[1], 10),
       status: m[2],
-      phrase: m[3] !== undefined ? unescapePhrase(m[3]) : undefined,
+      phrase: m[3] !== undefined && m[3] !== '' ? unescapePhrase(m[3]) : undefined,
       text: m[4] ?? '',
       replies: [],
       span: { start: line.start, end: line.end },
@@ -105,9 +104,9 @@ export function parseReviewComments(text: string): ParseResult {
   }
 
   const markers: { id: number; span: Span }[] = [];
-  MARKER_RE.lastIndex = 0;
+  const markerRe = /\[\^rc-(\d+)\]/g;
   let mm: RegExpExecArray | null;
-  while ((mm = MARKER_RE.exec(text))) {
+  while ((mm = markerRe.exec(text))) {
     const span: Span = { start: mm.index, end: mm.index + mm[0].length };
     if (defs.some((d) => span.start >= d.span.start && span.start < d.span.end)) continue;
     const line = lines.find((l) => span.start >= l.start && span.start <= l.end);
@@ -162,10 +161,11 @@ function resolveAnchor(
     };
   }
   const li = lines.findIndex((l) => marker.start >= l.start && marker.start <= l.end);
+  if (li === -1) return { state: 'stale' };
   let lo = li;
   let hi = li;
-  while (lo > 0 && lines[lo - 1].text.trim() !== '') lo--;
-  while (hi < lines.length - 1 && lines[hi + 1].text.trim() !== '') hi++;
+  while (lo > 0 && lines[lo - 1].text.trim() !== '' && !lines[lo - 1].inFence) lo--;
+  while (hi < lines.length - 1 && lines[hi + 1].text.trim() !== '' && !lines[hi + 1].inFence) hi++;
   const paraStart = lines[lo].start;
   const para = text.slice(paraStart, lines[hi].end);
   const idx = para.indexOf(phrase);

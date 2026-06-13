@@ -118,3 +118,27 @@ describe('anchor resolution', () => {
     expect(c.anchorRange).toBeUndefined();
   });
 });
+
+describe('robustness', () => {
+  test('parses CRLF line endings', () => {
+    const text = 'The fee is 25 feet[^rc-1] today.\r\n\r\n[^rc-1]: 💬 ("25 feet") Check this.\r\n';
+    const r = parseReviewComments(text);
+    expect(r.comments).toHaveLength(1);
+    expect(r.comments[0].text).toBe('Check this.');
+    expect(r.comments[0].state).toBe('ok');
+    expect(r.danglingMarkers).toHaveLength(0);
+  });
+
+  test('marker at offset 0', () => {
+    const text = '[^rc-1] leading marker\n\n[^rc-1]: 💬 ("nope") x\n';
+    const c = parseReviewComments(text).comments[0];
+    expect(c.state).toBe('stale');
+  });
+
+  test('empty quoted phrase is treated as block comment', () => {
+    const text = 'A paragraph.[^rc-1]\n\n[^rc-1]: 💬 ("") note\n';
+    const c = parseReviewComments(text).comments[0];
+    expect(c.anchorPhrase).toBeUndefined();
+    expect(c.state).toBe('ok');
+  });
+});
