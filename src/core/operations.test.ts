@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { parseReviewComments } from './parser';
-import { applyEdits, editComment, insertComment, nextId, removeComment, stripAll } from './operations';
+import { applyEdits, convertToBlock, editComment, insertComment, moveMarkerToPhrase, nextId, reanchor, removeComment, stripAll } from './operations';
 
 describe('applyEdits', () => {
   test('applies multiple edits against original offsets', () => {
@@ -109,5 +109,40 @@ describe('stripAll', () => {
 
   test('single undo friendliness: returns plain edits, no comments → no edits', () => {
     expect(stripAll(parseReviewComments('plain\n'))).toEqual([]);
+  });
+});
+
+describe('recovery operations', () => {
+  test('reanchor moves marker to selection and rewrites snapshot', () => {
+    const text =
+      'fee is thirty feet[^rc-1] now\n\n[^rc-1]: 💬 ("25 feet") check\n';
+    const selStart = text.indexOf('thirty feet');
+    const selEnd = selStart + 'thirty feet'.length;
+    const out = applyEdits(
+      text,
+      reanchor(text, parseReviewComments(text), 1, selStart, selEnd)
+    );
+    expect(out).toContain('fee is thirty feet[^rc-1] now');
+    expect(out).toContain('[^rc-1]: 💬 ("thirty feet") check');
+    expect(parseReviewComments(out).comments[0].state).toBe('ok');
+  });
+
+  test('convertToBlock drops the quoted phrase', () => {
+    const text = 'fee is thirty feet[^rc-1] now\n\n[^rc-1]: 💬 ("25 feet") check\n';
+    const out = applyEdits(text, convertToBlock(text, parseReviewComments(text), 1));
+    expect(out).toContain('[^rc-1]: 💬 check\n');
+    const c = parseReviewComments(out).comments[0];
+    expect(c.anchorPhrase).toBeUndefined();
+    expect(c.state).toBe('ok');
+  });
+
+  test('moveMarkerToPhrase relocates marker next to the found phrase', () => {
+    const text =
+      'Now 25 feet is early, marker later[^rc-1] in line.\n\n[^rc-1]: 💬 ("25 feet") check\n';
+    const parse = parseReviewComments(text);
+    expect(parse.comments[0].state).toBe('moved');
+    const out = applyEdits(text, moveMarkerToPhrase(text, parse, 1));
+    expect(out).toContain('Now 25 feet[^rc-1] is early, marker later in line.');
+    expect(parseReviewComments(out).comments[0].state).toBe('ok');
   });
 });
