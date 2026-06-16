@@ -4,6 +4,7 @@
   "description": "Attach lightweight review comments to markdown files as rc- footnotes.",
   "version": "0.1.0",
   "publisher": "abush",
+  "repository": { "type": "git", "url": "https://github.com/aaronbush/md-reviewer.git" },
   "engines": { "vscode": "^1.85.0" },
   "categories": ["Other"],
   "activationEvents": ["onLanguage:markdown"],
